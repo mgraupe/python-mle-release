@@ -6,16 +6,16 @@ import pylab as plt
 latencies = np.loadtxt('latencies.txt')
 
 cc, bbRaw = np.histogram(latencies,bins=50,density=True)
-bb = (bbRaw[:1]+bbRaw[:-1])/2.
+bb = (bbRaw[:-1]+bbRaw[1:])/2.
 
 #ydata = np.array([0.1,0.15,0.2,0.3,0.7,0.8,0.9, 0.9, 0.95])
 #xdata = np.array(range(0,len(ydata),1))
 
 def singleExponential(xdata,k):
-    return np.exp(-k*xdata)
+    return np.exp(-xdata/k)
 
 def doubleExponential(xdata,k1,k2,theta):
-    return theta*np.exp(-k1*xdata) + (1.-theta)*np.exp(-k2*xdata)
+    return theta*np.exp(-xdata/k1) + (1.-theta)*np.exp(-xdata/k2)
 
 def singleExponentialLLE(params):
     k = params[0]
@@ -51,7 +51,7 @@ resultsSE = minimize(singleExponentialLLE, initParamsSE, method='Nelder-Mead')
 print resultsSE.x
 print 'single exponential :', singleExponentialLLE(resultsSE.x)
 
-initParamsDE = [0.1, 3., 0.5, 0.1]
+initParamsDE = [0.5, 3., 0.8, 0.1]
 
 resultsDE = minimize(doubleExponentialLLE, initParamsDE, method='Nelder-Mead')
 print resultsDE.x
@@ -68,5 +68,6 @@ plt.clf()
 plt.plot(bb,cc, 'go')
 plt.plot(bb, yOutSE)
 plt.plot(bb, yOutDE)
+#plt.hist(cc-yOutDE)
 plt.show()
 
