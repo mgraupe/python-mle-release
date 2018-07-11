@@ -4,12 +4,12 @@ from scipy.optimize import minimize
 import pylab as plt
 
 
-lat1 = np.random.exponential(scale=0.5,size=10000)
-lat2 = np.random.exponential(scale=5.,size=10000)
+lat1 = np.random.exponential(scale=0.5,size=1000)
+lat2 = np.random.exponential(scale=5.,size=1000)
 
 latencies = np.concatenate((lat1,lat2))
 
-cc, bbRaw = np.histogram(latencies,bins=500,density=True)
+cc, bbRaw = np.histogram(latencies,bins=1000,density=True)
 bb = (bbRaw[:-1]+bbRaw[1:])/2.
 
 sortedLate = np.sort(latencies)
@@ -22,7 +22,7 @@ def doubleExponentialCumul(xdata,t1,t2,beta):
     return beta*(1. - np.exp(-xdata/t1)) + (1.-beta)*(1. - np.exp(-xdata/t2))
 
 def doubleExponential(xdata,k1,k2,theta):
-    return theta*np.exp(-xdata/k1) + (1.-theta)*np.exp(-xdata/k2)
+    return theta*np.exp(-xdata/k1)/k1 + (1.-theta)*np.exp(-xdata/k2)/k2
 
 def doubleExponentialCumulLLE(params):
     t1 = params[0]
@@ -41,6 +41,7 @@ def doubleExponentialLLE(params):
     k1 = params[0]
     k2 = params[1]
     theta = params[2]
+    #amp = params[3]
     sd = params[3]
 
     yPred = doubleExponential(bb,k1,k2,theta)
@@ -71,8 +72,8 @@ estParmsDE = resultsDE.x
 yOutDE =  doubleExponential(bb,estParmsDE[0],estParmsDE[1],estParmsDE[2]) # 1 / (1+ np.exp(-estParms[0]*(xdata-estParms[1])))
 
 plt.clf()
-plt.plot(bb,cc, 'go')
-plt.plot(sortedLate,cumul, 'go')
+plt.plot(bb,cc, 'o')
+plt.plot(sortedLate,cumul, 'o')
 plt.plot(sortedLate, yOutDEC)
 plt.plot(bb, yOutDE)
 #plt.hist(cc-yOutDE)
